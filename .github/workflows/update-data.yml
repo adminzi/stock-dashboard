@@ -1,0 +1,86 @@
+name: Update Stock Data
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch US stock data
+        run: |
+          python3 << 'EOF'
+          import urllib.request, json, time
+
+          def fetch(sym, range_="5d", interval="1d"):
+              url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}?range={range_}&interval={interval}"
+              req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+              with urllib.request.urlopen(req, timeout=10) as r:
+                  return json.loads(r.read())["chart"]["result"][0]
+
+          def quote(sym):
+              try:
+                  d = fetch(sym)
+                  closes = [c for c in d["indicators"]["quote"][0]["close"] if c is not None]
+                  prev, last = closes[-2], closes[-1]
+                  return {"last": round(last,2), "prev": round(prev,2),
+                          "change": round(last-prev,2), "pct": round((last-prev)/prev*100,2)}
+              except Exception as e:
+                  print(f"Error {sym}: {e}")
+                  return None
+
+          def history(sym):
+              try:
+                  d = fetch(sym, "1mo")
+                  ts = d["timestamp"]
+                  closes = d["indicators"]["quote"][0]["close"]
+                  return [{"t": t, "c": round(c,2)} for t,c in zip(ts,closes) if c is not None]
+              except:
+                  return []
+
+          themes = {
+              "반도체": {"NVDA": "NVDA", "AVGO": "AVGO"},
+              "AI":     {"MSFT": "MSFT", "GOOGL": "GOOGL"},
+              "원전":   {"CEG": "CEG", "VST": "VST"},
+              "스테이블코인": {"COIN": "COIN", "HOOD": "HOOD"},
+              "금융":   {"JPM": "JPM", "BAC": "BAC"},
+              "항공":   {"DAL": "DAL", "UAL": "UAL"},
+              "방위":   {"LMT": "LMT", "RTX": "RTX"},
+              "ETF":    {"SPY": "SPY", "QQQ": "QQQ"},
+          }
+
+          result = {
+              "updated": time.strftime("%Y-%m-%d %H:%M KST", time.gmtime(time.time()+32400)),
+              "us_indices": {
+                  "SP500":  quote("%5EGSPC"),
+                  "NASDAQ": quote("%5EIXIC"),
+              },
+              "us_themes": {},
+              "us_charts": {
+                  "SP500":  history("%5EGSPC"),
+                  "NASDAQ": history("%5EIXIC"),
+              }
+          }
+
+          for theme, stocks in themes.items():
+              result["us_themes"][theme] = {sym: quote(sym) for sym in stocks}
+
+          with open("data.json", "w", encoding="utf-8") as f:
+              json.dump(result, f, ensure_ascii=False, indent=2)
+          print("✅ data.json 저장 완료")
+          EOF
+
+      - name: Commit data.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "📈 US data update: $(date +'%Y-%m-%d %H:%M')"
+          git push
