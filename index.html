@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 미국/한국 증시 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;padding:20px 24px}
+  h1{font-size:1.4rem;margin-bottom:2px}
+  .meta{color:#8b949e;font-size:.8rem;margin-bottom:24px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:#3fb950;animation:pulse 1.5s infinite;display:inline-block;margin-right:4px}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  h2{font-size:1rem;color:#58a6ff;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #21262d}
+  h3{font-size:.8rem;color:#8b949e;margin:18px 0 8px;text-transform:uppercase;letter-spacing:.06em}
+  .cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+  .card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 18px;flex:1;min-width:140px}
+  .card .lbl{font-size:.75rem;color:#8b949e;margin-bottom:4px}
+  .card .val{font-size:1.25rem;font-weight:700}
+  .card .chg{font-size:.82rem;margin-top:3px}
+  .up{color:#3fb950}.down{color:#f85149}.flat{color:#8b949e}
+  .charts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  @media(max-width:600px){.charts{grid-template-columns:1fr}}
+  .chart-box{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px}
+  .chart-box canvas{max-height:180px}
+  .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:16px}
+  .theme-block{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px}
+  .theme-title{font-size:.78rem;color:#8b949e;font-weight:600;margin-bottom:10px}
+  .theme-stocks{display:flex;gap:8px}
+  .s-card{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 12px;flex:1}
+  .s-card .s-name{font-size:.7rem;color:#8b949e;margin-bottom:3px}
+  .s-card .s-val{font-size:1rem;font-weight:700}
+  .s-card .s-chg{font-size:.76rem;margin-top:2px}
+  .divider{height:1px;background:#21262d;margin:28px 0}
+  .btn{background:#21262d;border:1px solid #30363d;color:#e6edf3;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+  .btn:hover{background:#30363d}
+  .err{color:#f85149;font-size:.83rem;padding:12px 0}
+  .loading{color:#8b949e;font-size:.83rem;padding:12px 0}
+  .market-badge{font-size:.72rem;padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:500}
+  .market-open{background:#1a3a2a;color:#3fb950}
+  .market-closed{background:#2a1a1a;color:#f85149}
+  .footer{color:#484f58;font-size:.72rem;margin-top:32px;line-height:1.9}
+</style>
+</head>
+<body>
+
+<h1>📊 미국 · 한국 증시 대시보드</h1>
+<div class="meta">
+  <span>🇺🇸 미국 데이터: <b id="us-updated">불러오는 중...</b></span>
+  <span><span class="live-dot"></span>🇰🇷 한국 장중 실시간 · 마지막 갱신: <b id="kr-updated">–</b></span>
+  <button class="btn" onclick="loadKR()">🔄 수동 갱신</button>
+  <span id="market-status"></span>
+</div>
+
+<h2>🇺🇸 미국 증시 &nbsp;<small style="font-size:.75rem;color:#484f58;font-weight:400">전일 종가 · 매일 KST 10:00 자동수집</small></h2>
+
+<h3>주요 지수</h3>
+<div class="cards" id="us-index-cards"><div class="loading">데이터 불러오는 중...</div></div>
+
+<div class="charts">
+  <div class="chart-box"><canvas id="chart-sp500"></canvas></div>
+  <div class="chart-box"><canvas id="chart-nasdaq"></canvas></div>
+</div>
+
+<h3>테마별 주요 종목</h3>
+<div class="theme-grid" id="us-theme-grid"><div class="loading">불러오는 중...</div></div>
+
+<div class="divider"></div>
+
+<h2>🇰🇷 한국 증시 &nbsp;<small style="font-size:.75rem;color:#484f58;font-weight:400">장중 5분 자동갱신 · 장외시간엔 전일 종가</small></h2>
+
+<h3>주요 지수 · 환율</h3>
+<div class="cards" id="kr-index-cards"><div class="loading">데이터 불러오는 중...</div></div>
+
+<h3>테마별 주요 종목</h3>
+<div class="theme-grid" id="kr-theme-grid"><div class="loading">불러오는 중...</div></div>
+
+<p class="footer">
+  ※ 미국 데이터: Yahoo Finance · GitHub Actions 매일 KST 10:00 자동수집<br>
+  ※ 한국 데이터: Yahoo Finance 직접 조회 · 장중(09:00~15:30) 5분마다 자동갱신<br>
+  ※ 본 대시보드는 정보 제공 목적이며 투자 권유가 아닙니다.
+</p>
+
+<script>
+const fmt = (n,d=2) => n==null ? '–' : Number(n).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d})
+const dirClass = p => p>0?'up':p<0?'down':'flat'
+const arrow = p => p>0?'▲':p<0?'▼':'–'
+
+function indexCard(label,val,chg,pct){
+  const d=dirClass(pct)
+  return `<div class="card">
+    <div class="lbl">${label}</div>
+    <div class="val">${fmt(val)}</div>
+    <div class="chg ${d}">${arrow(pct)} ${fmt(Math.abs(chg))} (${fmt(Math.abs(pct))}%)</div>
+  </div>`
+}
+
+function stockCard(name,val,chg,pct){
+  const d=dirClass(pct)
+  return `<div class="s-card">
+    <div class="s-name">${name}</div>
+    <div class="s-val">${fmt(val)}</div>
+    <div class="s-chg ${d}">${arrow(pct)} ${fmt(Math.abs(pct))}%</div>
+  </div>`
+}
+
+function themeBlock(emoji,title,inner){
+  return `<div class="theme-block">
+    <div class="theme-title">${emoji} ${title}</div>
+    <div class="theme-stocks">${inner}</div>
+  </div>`
+}
+
+function drawChart(id,items,label,color){
+  if(!items?.length) return
+  const labels=items.map(i=>{const d=new Date(i.t*1000);return `${d.getMonth()+1}/${d.getDate()}`})
+  new Chart(document.getElementById(id),{
+    type:'line',
+    data:{labels,datasets:[{label,data:items.map(i=>i.c),borderColor:color,backgroundColor:color+'18',fill:true,tension:0.3,pointRadius:1.5,borderWidth:2}]},
+    options:{
+      plugins:{legend:{labels:{color:'#8b949e',font:{size:11}}}},
+      scales:{
+        x:{ticks:{color:'#8b949e',maxTicksLimit:8,font:{size:10}},grid:{color:'#21262d'}},
+        y:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'}}
+      }
+    }
+  })
+}
+
+async function loadUS(){
+  try{
+    const r=await fetch('data.json?_='+Date.now())
+    if(!r.ok) throw new Error()
+    const d=await r.json()
+    document.getElementById('us-updated').textContent=d.updated||'–'
+
+    const idxLabel={SP500:'S&P 500',NASDAQ:'NASDAQ'}
+    document.getElementById('us-index-cards').innerHTML=
+      Object.entries(d.us_indices||{}).map(([k,v])=>
+        v?indexCard(idxLabel[k]||k,v.last,v.change,v.pct):''
+      ).join('')
+
+    drawChart('chart-sp500',d.us_charts?.SP500,'S&P 500 (1개월)','#58a6ff')
+    drawChart('chart-nasdaq',d.us_charts?.NASDAQ,'NASDAQ (1개월)','#a371f7')
+
+    const emojiMap={반도체:'🔬',AI:'🤖',원전:'⚛️',스테이블코인:'💰',금융:'🏦',항공:'✈️',방위:'🛡️',ETF:'📦'}
+    let html=''
+    for(const [theme,stocks] of Object.entries(d.us_themes||{})){
+      const inner=Object.entries(stocks).map(([sym,v])=>
+        v?stockCard(sym,v.last,v.change,v.pct)
+         :`<div class="s-card"><div class="s-name">${sym}</div><div class="s-val">–</div></div>`
+      ).join('')
+      html+=themeBlock(emojiMap[theme]||'📌',theme,inner)
+    }
+    document.getElementById('us-theme-grid').innerHTML=html||'<div class="err">데이터 없음</div>'
+
+  }catch(e){
+    document.getElementById('us-index-cards').innerHTML=
+      '<div class="err">⚠️ data.json 없음 → Actions 탭에서 Run workflow를 먼저 실행해주세요.</div>'
+    document.getElementById('us-theme-grid').innerHTML=''
+  }
+}
+
+const PROXY='https://corsproxy.io/?'
+
+async function yfFetch(sym){
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=5d&interval=1d`
+  const res=await fetch(PROXY+encodeURIComponent(url))
+  const j=await res.json()
+  return j.chart.result[0]
+}
+
+function parseQuote(d){
+  const closes=d.indicators.quote[0].close.filter(Boolean)
+  const prev=closes[closes.length-2],last=closes[closes.length-1]
+  return{last,change:last-prev,pct:(last-prev)/prev*100}
+}
+
+async function loadKR(){
+  const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+  document.getElementById('kr-updated').textContent=now
+
+  const indices=[
+    {sym:'^KS11',label:'KOSPI'},
+    {sym:'^KQ11',label:'KOSDAQ'},
+    {sym:'KRW=X',label:'USD/KRW'},
+  ]
+  const idxResults=await Promise.allSettled(indices.map(i=>yfFetch(i.sym)))
+  document.getElementById('kr-index-cards').innerHTML=indices.map((idx,i)=>{
+    if(idxResults[i].status!=='fulfilled')
+      return `<div class="card"><div class="lbl">${idx.label}</div><div class="val">–</div></div>`
+    const q=parseQuote(idxResults[i].value)
+    return indexCard(idx.label,q.last,q.change,q.pct)
+  }).join('')
+
+  const krThemes=[
+    {emoji:'🔬',title:'반도체',stocks:[{sym:'005930.KS',name:'삼성전자'},{sym:'000660.KS',name:'SK하이닉스'}]},
+    {emoji:'⚛️',title:'원전',  stocks:[{sym:'034020.KS',name:'두산에너빌리티'},{sym:'015760.KS',name:'한국전력'}]},
+    {emoji:'🤖',title:'AI',    stocks:[{sym:'035420.KS',name:'NAVER'},{sym:'035720.KS',name:'카카오'}]},
+    {emoji:'🦾',title:'로봇',  stocks:[{sym:'005380.KS',name:'현대차'},{sym:'277810.KS',name:'레인보우로보틱스'}]},
+    {emoji:'🏦',title:'금융',  stocks:[{sym:'105560.KS',name:'KB금융'},{sym:'055550.KS',name:'신한지주'}]},
+    {emoji:'⚡',title:'에너지',stocks:[{sym:'373220.KS',name:'LG에너지솔루션'},{sym:'010950.KS',name:'S-Oil'}]},
+    {emoji:'📦',title:'ETF',   stocks:[{sym:'360750.KS',name:'TIGER S&P500'},{sym:'133690.KS',name:'TIGER 나스닥100'}]},
+  ]
+
+  let krHtml=''
+  for(const theme of krThemes){
+    const results=await Promise.allSettled(theme.stocks.map(s=>yfFetch(s.sym)))
+    const inner=theme.stocks.map((s,i)=>{
+      if(results[i].status!=='fulfilled')
+        return `<div class="s-card"><div class="s-name">${s.name}</div><div class="s-val">–</div></div>`
+      const q=parseQuote(results[i].value)
+      return stockCard(s.name,q.last,q.change,q.pct)
+    }).join('')
+    krHtml+=themeBlock(theme.emoji,theme.title,inner)
+  }
+  document.getElementById('kr-theme-grid').innerHTML=krHtml
+}
+
+function updateMarketStatus(){
+  const kst=new Date(new Date().getTime()+9*3600*1000)
+  const day=kst.getUTCDay()
+  const mins=kst.getUTCHours()*60+kst.getUTCMinutes()
+  const isOpen=day>=1&&day<=5&&mins>=9*60&&mins<15*60+30
+  document.getElementById('market-status').innerHTML=
+    `<span class="market-badge ${isOpen?'market-open':'market-closed'}">${isOpen?'🟢 한국 장중':'🔴 한국 장외'}</span>`
+  return isOpen
+}
+
+loadUS()
+loadKR()
+updateMarketStatus()
+
+setInterval(()=>{ if(updateMarketStatus()) loadKR() }, 5*60*1000)
+setInterval(updateMarketStatus, 60*1000)
+</script>
+</body>
+</html>
