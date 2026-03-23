@@ -1,5 +1,5 @@
 {
-  "updated": "2026-03-22 14:34 KST",
+  "updated": "2026-03-23 14:55 KST",
   "us_indices": {
     "SP500": {
       "last": 6506.48,
@@ -17,10 +17,10 @@
   "us_themes": {
     "반도체": {
       "NVDA": {
-        "last": 172.7,
+        "last": 172.93,
         "prev": 172.7,
-        "change": 0.0,
-        "pct": 0.0
+        "change": 0.23,
+        "pct": 0.13
       },
       "AVGO": {
         "last": 310.51,
@@ -31,10 +31,10 @@
     },
     "AI": {
       "MSFT": {
-        "last": 381.87,
+        "last": 381.85,
         "prev": 381.87,
-        "change": 0.0,
-        "pct": 0.0
+        "change": -0.02,
+        "pct": -0.01
       },
       "GOOGL": {
         "last": 301.0,
