@@ -7,44 +7,45 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;padding:20px 24px}
-  h1{font-size:1.4rem;margin-bottom:2px}
-  .meta{color:#8b949e;font-size:.8rem;margin-bottom:24px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
-  .live-dot{width:8px;height:8px;border-radius:50%;background:#3fb950;animation:pulse 1.5s infinite;display:inline-block;margin-right:4px}
+  body{font-family:'Segoe UI',sans-serif;background:#f6f8fa;color:#1a1a2e;padding:20px 24px}
+  h1{font-size:1.4rem;margin-bottom:2px;color:#1a1a2e}
+  .meta{color:#57606a;font-size:.8rem;margin-bottom:24px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:#1a7f37;animation:pulse 1.5s infinite;display:inline-block;margin-right:4px}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  h2{font-size:1rem;color:#58a6ff;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #21262d}
-  h3{font-size:.8rem;color:#8b949e;margin:18px 0 8px;text-transform:uppercase;letter-spacing:.06em}
+  h2{font-size:1rem;color:#0969da;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #d0d7de}
+  h3{font-size:.8rem;color:#57606a;margin:18px 0 8px;text-transform:uppercase;letter-spacing:.06em}
   .cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
-  .card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 18px;flex:1;min-width:140px}
-  .card .lbl{font-size:.75rem;color:#8b949e;margin-bottom:4px}
-  .card .val{font-size:1.25rem;font-weight:700}
+  .card{background:#ffffff;border:1px solid #d0d7de;border-radius:10px;padding:14px 18px;flex:1;min-width:140px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .card .lbl{font-size:.75rem;color:#57606a;margin-bottom:4px}
+  .card .val{font-size:1.25rem;font-weight:700;color:#1a1a2e}
   .card .chg{font-size:.82rem;margin-top:3px}
-  .up{color:#3fb950}.down{color:#f85149}.flat{color:#8b949e}
-  .charts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-  @media(max-width:600px){.charts{grid-template-columns:1fr}}
-  .chart-box{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px}
+  .up{color:#1a7f37}.down{color:#cf222e}.flat{color:#57606a}
+  .charts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+  @media(max-width:800px){.charts{grid-template-columns:1fr 1fr}}
+  @media(max-width:500px){.charts{grid-template-columns:1fr}}
+  .chart-box{background:#ffffff;border:1px solid #d0d7de;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
   .chart-box canvas{max-height:180px}
   .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:16px}
-  .theme-block{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px}
-  .theme-title{font-size:.78rem;color:#8b949e;font-weight:600;margin-bottom:10px}
+  .theme-block{background:#ffffff;border:1px solid #d0d7de;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .theme-title{font-size:.78rem;color:#57606a;font-weight:600;margin-bottom:10px}
   .theme-stocks{display:flex;gap:8px}
-  .s-card{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 12px;flex:1}
-  .s-card .s-name{font-size:.7rem;color:#8b949e;margin-bottom:3px}
-  .s-card .s-val{font-size:1rem;font-weight:700}
+  .s-card{background:#f6f8fa;border:1px solid #d0d7de;border-radius:8px;padding:10px 12px;flex:1}
+  .s-card .s-name{font-size:.7rem;color:#57606a;margin-bottom:3px}
+  .s-card .s-val{font-size:1rem;font-weight:700;color:#1a1a2e}
   .s-card .s-chg{font-size:.76rem;margin-top:2px}
-  .divider{height:1px;background:#21262d;margin:28px 0}
-  .btn{background:#21262d;border:1px solid #30363d;color:#e6edf3;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
-  .btn:hover{background:#30363d}
-  .err{color:#f85149;font-size:.83rem;padding:12px 0}
-  .loading{color:#8b949e;font-size:.83rem;padding:12px 0}
+  .divider{height:1px;background:#d0d7de;margin:28px 0}
+  .btn{background:#ffffff;border:1px solid #d0d7de;color:#1a1a2e;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+  .btn:hover{background:#f3f4f6}
+  .err{color:#cf222e;font-size:.83rem;padding:12px 0}
+  .loading{color:#57606a;font-size:.83rem;padding:12px 0}
   .market-badge{font-size:.72rem;padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:500}
-  .market-open{background:#1a3a2a;color:#3fb950}
-  .market-closed{background:#2a1a1a;color:#f85149}
-  .footer{color:#484f58;font-size:.72rem;margin-top:32px;line-height:1.9}
+  .market-open{background:#dafbe1;color:#1a7f37}
+  .market-closed{background:#ffebe9;color:#cf222e}
+  .footer{color:#8c959f;font-size:.72rem;margin-top:32px;line-height:1.9}
 </style>
 </head>
 <body>
-
+ 
 <h1>📊 미국 · 한국 증시 대시보드</h1>
 <div class="meta">
   <span><span class="live-dot"></span>🇺🇸 미국 마지막 갱신: <b id="us-updated">불러오는 중...</b></span>
@@ -52,44 +53,50 @@
   <button class="btn" onclick="loadAll()">🔄 전체 갱신</button>
   <span id="market-status"></span>
 </div>
-
+ 
 <h2>🇺🇸 미국 증시 &nbsp;<small style="font-size:.75rem;color:#484f58;font-weight:400">전일 종가 기준</small></h2>
-
+ 
 <h3>주요 지수</h3>
 <div class="cards" id="us-index-cards"><div class="loading">데이터 불러오는 중...</div></div>
-
+ 
 <div class="charts">
   <div class="chart-box"><canvas id="chart-sp500"></canvas></div>
   <div class="chart-box"><canvas id="chart-nasdaq"></canvas></div>
+  <div class="chart-box"><canvas id="chart-dji"></canvas></div>
 </div>
-
+ 
 <h3>테마별 주요 종목</h3>
 <div class="theme-grid" id="us-theme-grid"><div class="loading">불러오는 중...</div></div>
-
+ 
 <div class="divider"></div>
-
+ 
 <h2>🇰🇷 한국 증시 &nbsp;<small style="font-size:.75rem;color:#484f58;font-weight:400">장중 5분 자동갱신 · 장외시간엔 전일 종가</small></h2>
-
+ 
 <h3>주요 지수 · 환율</h3>
 <div class="cards" id="kr-index-cards"><div class="loading">데이터 불러오는 중...</div></div>
-
+ 
+<div class="charts" style="grid-template-columns:1fr 1fr">
+  <div class="chart-box"><canvas id="chart-kospi"></canvas></div>
+  <div class="chart-box"><canvas id="chart-kosdaq"></canvas></div>
+</div>
+ 
 <h3>테마별 주요 종목</h3>
 <div class="theme-grid" id="kr-theme-grid"><div class="loading">불러오는 중...</div></div>
-
+ 
 <p class="footer">
   ※ 미국/한국 데이터: Yahoo Finance 직접 조회<br>
   ※ 미국 장중(미동부 09:30~16:00) · 한국 장중(KST 09:00~15:30) 5분마다 자동갱신<br>
   ※ 본 대시보드는 정보 제공 목적이며 투자 권유가 아닙니다.
 </p>
-
+ 
 <script>
 const fmt = (n,d=2) => n==null ? '–' : Number(n).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d})
 const dirClass = p => p>0?'up':p<0?'down':'flat'
 const arrow = p => p>0?'▲':p<0?'▼':'–'
-
+ 
 const PROXY = 'https://corsproxy.io/?'
 const chartInstances = {}
-
+ 
 function indexCard(label,val,chg,pct){
   const d=dirClass(pct)
   return `<div class="card">
@@ -98,7 +105,7 @@ function indexCard(label,val,chg,pct){
     <div class="chg ${d}">${arrow(pct)} ${fmt(Math.abs(chg))} (${fmt(Math.abs(pct))}%)</div>
   </div>`
 }
-
+ 
 function stockCard(name,val,chg,pct){
   const d=dirClass(pct)
   return `<div class="s-card">
@@ -107,21 +114,21 @@ function stockCard(name,val,chg,pct){
     <div class="s-chg ${d}">${arrow(pct)} ${fmt(Math.abs(pct))}%</div>
   </div>`
 }
-
+ 
 function themeBlock(emoji,title,inner){
   return `<div class="theme-block">
     <div class="theme-title">${emoji} ${title}</div>
     <div class="theme-stocks">${inner}</div>
   </div>`
 }
-
+ 
 async function yfFetch(sym, range='5d', interval='1d'){
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=${range}&interval=${interval}`
   const res = await fetch(PROXY + encodeURIComponent(url))
   const j = await res.json()
   return j.chart.result[0]
 }
-
+ 
 function parseQuote(d){
   const closes = d.indicators.quote[0].close.filter(v => v != null)
   if(closes.length < 2) return null
@@ -129,7 +136,7 @@ function parseQuote(d){
   const last = closes[closes.length-1]
   return { last, change: last-prev, pct: (last-prev)/prev*100 }
 }
-
+ 
 function parseQuoteWithChart(d){
   const closes = d.indicators.quote[0].close
   const times  = d.timestamp
@@ -142,7 +149,7 @@ function parseQuoteWithChart(d){
     chart: valid
   }
 }
-
+ 
 function drawChart(id, items, label, color){
   if(!items?.length) return
   if(chartInstances[id]) chartInstances[id].destroy()
@@ -151,27 +158,28 @@ function drawChart(id, items, label, color){
     type:'line',
     data:{labels, datasets:[{label, data:items.map(i=>i.c), borderColor:color, backgroundColor:color+'18', fill:true, tension:0.3, pointRadius:1.5, borderWidth:2}]},
     options:{
-      plugins:{legend:{labels:{color:'#8b949e',font:{size:11}}}},
+      plugins:{legend:{labels:{color:'#57606a',font:{size:11}}}},
       scales:{
-        x:{ticks:{color:'#8b949e',maxTicksLimit:8,font:{size:10}},grid:{color:'#21262d'}},
-        y:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'}}
+        x:{ticks:{color:'#57606a',maxTicksLimit:8,font:{size:10}},grid:{color:'#d0d7de'}},
+        y:{ticks:{color:'#57606a',font:{size:10}},grid:{color:'#d0d7de'}}
       }
     }
   })
 }
-
+ 
+// ── 미국 증시 ──────────────────────────────────────────────
 async function loadUS(){
   document.getElementById('us-index-cards').innerHTML = '<div class="loading">데이터 불러오는 중...</div>'
   document.getElementById('us-theme-grid').innerHTML  = '<div class="loading">불러오는 중...</div>'
-
+ 
   const usIndices = [
-    {sym:'^GSPC', label:'S&P 500',  chartId:'chart-sp500',  color:'#58a6ff'},
-    {sym:'^IXIC', label:'NASDAQ',   chartId:'chart-nasdaq', color:'#a371f7'},
-    {sym:'^DJI',  label:'DOW JONES',chartId:null,           color:null},
+    {sym:'^GSPC', label:'S&P 500',  chartId:'chart-sp500',  color:'#0969da'},
+    {sym:'^IXIC', label:'NASDAQ',   chartId:'chart-nasdaq', color:'#8250df'},
+    {sym:'^DJI',  label:'DOW JONES',chartId:'chart-dji',    color:'#1a7f37'},
   ]
-
+ 
   const idxResults = await Promise.allSettled(usIndices.map(i=>yfFetch(i.sym,'1mo','1d')))
-
+ 
   document.getElementById('us-index-cards').innerHTML = usIndices.map((idx,i)=>{
     if(idxResults[i].status!=='fulfilled') return `<div class="card"><div class="lbl">${idx.label}</div><div class="val">–</div></div>`
     const q = parseQuoteWithChart(idxResults[i].value)
@@ -179,10 +187,10 @@ async function loadUS(){
     if(idx.chartId) drawChart(idx.chartId, q.chart, `${idx.label} (1개월)`, idx.color)
     return indexCard(idx.label, q.last, q.change, q.pct)
   }).join('')
-
+ 
   const now = new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
   document.getElementById('us-updated').textContent = now
-
+ 
   const usThemes = [
     {emoji:'🔬', title:'반도체',      stocks:[{sym:'NVDA',  name:'NVDA'}, {sym:'AVGO',  name:'AVGO'}]},
     {emoji:'🤖', title:'AI',          stocks:[{sym:'MSFT',  name:'MSFT'}, {sym:'GOOGL', name:'GOOGL'}]},
@@ -193,7 +201,7 @@ async function loadUS(){
     {emoji:'🛡️', title:'방위',         stocks:[{sym:'LMT',   name:'LMT'},  {sym:'RTX',   name:'RTX'}]},
     {emoji:'📦', title:'ETF',          stocks:[{sym:'SPY',   name:'SPY'},  {sym:'QQQ',   name:'QQQ'}]},
   ]
-
+ 
   let html = ''
   for(const theme of usThemes){
     const results = await Promise.allSettled(theme.stocks.map(s=>yfFetch(s.sym,'5d','1d')))
@@ -207,24 +215,26 @@ async function loadUS(){
   }
   document.getElementById('us-theme-grid').innerHTML = html || '<div class="err">데이터 없음</div>'
 }
-
+ 
+// ── 한국 증시 ──────────────────────────────────────────────
 async function loadKR(){
   const now = new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
   document.getElementById('kr-updated').textContent = now
-
+ 
   const indices = [
-    {sym:'^KS11', label:'KOSPI'},
-    {sym:'^KQ11', label:'KOSDAQ'},
-    {sym:'KRW=X', label:'USD/KRW'},
+    {sym:'^KS11', label:'KOSPI',    chartId:'chart-kospi',  color:'#cf222e'},
+    {sym:'^KQ11', label:'KOSDAQ',   chartId:'chart-kosdaq', color:'#e36209'},
+    {sym:'KRW=X', label:'USD/KRW',  chartId:null,           color:null},
   ]
-  const idxResults = await Promise.allSettled(indices.map(i=>yfFetch(i.sym)))
+  const idxResults = await Promise.allSettled(indices.map(i=>yfFetch(i.sym,'1mo','1d')))
   document.getElementById('kr-index-cards').innerHTML = indices.map((idx,i)=>{
     if(idxResults[i].status!=='fulfilled') return `<div class="card"><div class="lbl">${idx.label}</div><div class="val">–</div></div>`
-    const q = parseQuote(idxResults[i].value)
+    const q = parseQuoteWithChart(idxResults[i].value)
     if(!q) return `<div class="card"><div class="lbl">${idx.label}</div><div class="val">–</div></div>`
+    if(idx.chartId) drawChart(idx.chartId, q.chart, `${idx.label} (1개월)`, idx.color)
     return indexCard(idx.label, q.last, q.change, q.pct)
   }).join('')
-
+ 
   const krThemes = [
     {emoji:'🔬', title:'반도체',  stocks:[{sym:'005930.KS',name:'삼성전자'},{sym:'000660.KS',name:'SK하이닉스'}]},
     {emoji:'⚛️', title:'원전',    stocks:[{sym:'034020.KS',name:'두산에너빌리티'},{sym:'015760.KS',name:'한국전력'}]},
@@ -234,7 +244,7 @@ async function loadKR(){
     {emoji:'⚡', title:'에너지',  stocks:[{sym:'373220.KS',name:'LG에너지솔루션'},{sym:'010950.KS',name:'S-Oil'}]},
     {emoji:'📦', title:'ETF',     stocks:[{sym:'360750.KS',name:'TIGER S&P500'},{sym:'133690.KS',name:'TIGER 나스닥100'}]},
   ]
-
+ 
   let krHtml = ''
   for(const theme of krThemes){
     const results = await Promise.allSettled(theme.stocks.map(s=>yfFetch(s.sym)))
@@ -248,40 +258,43 @@ async function loadKR(){
   }
   document.getElementById('kr-theme-grid').innerHTML = krHtml
 }
-
+ 
+// ── 장 상태 ────────────────────────────────────────────────
 function updateMarketStatus(){
   const kst  = new Date(new Date().getTime() + 9*3600*1000)
   const day  = kst.getUTCDay()
   const mins = kst.getUTCHours()*60 + kst.getUTCMinutes()
   const isKROpen = day>=1 && day<=5 && mins>=9*60 && mins<15*60+30
-
+ 
+  // 미국 동부시간 기준 (UTC-4 서머타임 / UTC-5 표준)
   const etOffset = -4
   const et   = new Date(new Date().getTime() + etOffset*3600*1000)
   const etDay  = et.getUTCDay()
   const etMins = et.getUTCHours()*60 + et.getUTCMinutes()
   const isUSOpen = etDay>=1 && etDay<=5 && etMins>=9*60+30 && etMins<16*60
-
+ 
   document.getElementById('market-status').innerHTML =
     `<span class="market-badge ${isKROpen?'market-open':'market-closed'}">${isKROpen?'🟢 한국 장중':'🔴 한국 장외'}</span>` +
     `<span class="market-badge ${isUSOpen?'market-open':'market-closed'}" style="margin-left:4px">${isUSOpen?'🟢 미국 장중':'🔴 미국 장외'}</span>`
-
+ 
   return { isKROpen, isUSOpen }
 }
-
+ 
 function loadAll(){
   loadUS()
   loadKR()
 }
-
+ 
+// ── 초기 실행 ──────────────────────────────────────────────
 loadAll()
 updateMarketStatus()
-
+ 
 setInterval(()=>{
   const { isKROpen, isUSOpen } = updateMarketStatus()
-  if(isKROpen) loadKR()
-  if(isUSOpen) loadUS()
+  if(isKROpen)  loadKR()
+  if(isUSOpen)  loadUS()
 }, 5*60*1000)
-
+ 
 setInterval(updateMarketStatus, 60*1000)
 </script>
 </body>
